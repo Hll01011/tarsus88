@@ -28,13 +28,19 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  overflow: hidden;
+  height: 100%;
+}
 
 body {
   background: var(--navy);
   color: var(--cream);
   font-family: var(--font-body);
   overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
   cursor: none;
 }
 
