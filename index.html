@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TARSUS 88 | Kara Yolu Yük Taşımacılığı</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- DÜZELTME 1: Bozuk font URL'si düzeltildi ({ → wght@ ) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+
+    <style>
+        :root {
+            --bg-void: #F0F4F8;
+            --text-dark: #333333;
+            --accent-main: #2980B9;
+            --accent-light: #5DADE2;
+            --glass-surface: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(0, 0, 0, 0.15);
+            --neon-glow: rgba(41, 128, 185, 0.2);
+            --glow-light: rgba(41, 128, 185, 0.05);
+            --font-tech: 'Orbitron', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-void);
+            color: var(--text-dark);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            margin: 0;
+            perspective: 2000px;
+        }
+        
+        @keyframes wavy-move {
+            0%   { transform: translate(0, 0) scale(1.1) rotate(0deg); opacity: 0.8; }
+            33%  { transform: translate(-5%, 5%) scale(1.15) rotate(1deg); opacity: 0.9; }
+            66%  { transform: translate(5%, -5%) scale(1.05) rotate(-1deg); opacity: 0.85; }
+            100% { transform: translate(0, 0) scale(1.1) rotate(0deg); opacity: 0.8; }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            z-index: -2;
+            background: radial-gradient(circle at 10% 20%, #BFEFFF, #D9F7FF, #FFFFFF, #E0F7FA);
+            filter: blur(150px) saturate(150%) contrast(120%);
+            animation: wavy-move 40s infinite alternate ease-in-out;
+        }
+        
+        .fixed-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px var(--neon-glow);
+            color: var(--text-dark);
+        }
+
+        .cyber-card {
+            background: var(--glass-surface);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 15px var(--neon-glow), inset 0 0 10px var(--glow-light);
+            transform-style: preserve-3d;
+            transition: all 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-card:hover {
+            transform: scale(1.02);
+            border-color: var(--accent-main);
+            box-shadow: 0 0 25px var(--neon-glow), 0 0 70px rgba(41, 128, 185, 0.15), inset 0 0 35px var(--glow-light);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--text-dark), var(--accent-main));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .neon-glow-text {
+            text-shadow: 0 0 3px rgba(0,0,0,0.1), 0 0 10px var(--accent-main);
+        }
+        .text-accent-main  { color: var(--accent-main); }
+        .text-accent-light { color: var(--accent-light); }
+
+        /* DÜZELTME 2: form-control @apply kaldırıldı, gerçek CSS kurallarına dönüştürüldü */
+        .form-control {
+            width: 100%;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid #D1D5DB;
+            color: #1F2937;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            outline: none;
+            font-size: 0.875rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            font-family: var(--font-body);
+            transition: border-color 0.2s ease;
+        }
+        .form-control::placeholder { color: #6B7280; }
+        .form-control:focus { border-color: var(--accent-main); }
+
+        /* DÜZELTME 3: Mobil menü active durumu eklendi */
+        #mobile-menu-overlay {
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Başlangıçta gizli */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #mobile-menu-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* DÜZELTME 4: skip-link stili eklendi */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--accent-main);
+            color: #fff;
+            padding: 8px 16px;
+            z-index: 9999;
+            font-size: 0.875rem;
+            border-radius: 0 0 8px 0;
+            transition: top 0.2s;
+        }
+        .skip-link:focus {
+            top: 0;
+        }
+
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, var(--accent-main), var(--accent-light));
+            z-index: 9999; width: 0%;
+        }
+        .tech-font  { font-family: var(--font-tech); }
+        .map-hologram { filter: saturate(100%) brightness(1.1) contrast(1.1) grayscale(0.2) hue-rotate(200deg); }
+
+        /* ================================================= */
+        /* WIX IFRAME TAM EKRAN DÜZELTMESİ                  */
+        /* ================================================= */
+        html, body {
+            width: 100% !important;
+            min-height: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden !important;
+        }
+    </style>
+
+    <script>
+        // Wix iframe içinde yüksekliği dinamik olarak bildir
+        // Böylece Wix iframe'i sayfa boyutuna göre uzatır
+        function reportHeight() {
+            const height = document.documentElement.scrollHeight;
+            window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+        }
+        // Sayfa yüklenince ve her resize'da bildir
+        window.addEventListener('load', reportHeight);
+        window.addEventListener('resize', reportHeight);
+        // MutationObserver ile DOM değişikliklerinde de güncelle
+        const observer = new MutationObserver(reportHeight);
+        document.addEventListener('DOMContentLoaded', () => {
+            observer.observe(document.body, { subtree: true, childList: true, attributes: true });
+            reportHeight();
+        });
+    </script>
+</head>
+<body class="antialiased">
+
+    <div id="progress-bar"></div>
+
+    <a href="#main-content" class="skip-link">Ana İçeriğe Atla</a>
+    
+    <div id="word-assembly-container" class="fixed bottom-0 left-0 p-4 md:p-6 z-50 pointer-events-none fixed-glass border-t border-r border-blue-300/50 rounded-tr-xl hidden md:block">
+        <p class="text-xs font-bold mb-1 tech-font" style="color:var(--accent-main)">VERİ AKIŞ MONTAJ</p>
+        <div id="assembled-text" class="tech-font text-gray-600 text-sm md:text-lg font-bold tracking-wider whitespace-nowrap"></div>
+    </div>
+
+    <!-- MOBİL MENÜ -->
+    <div id="mobile-menu-overlay">
+        <button id="menu-close-btn" class="absolute top-6 right-6 p-2 z-50" style="color:var(--accent-main)">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <div class="flex flex-col space-y-8 text-2xl font-bold tracking-widest text-center">
+            <a href="#hub"        class="tech-font hover:text-blue-500 transition-colors text-3xl text-gray-800" data-close-menu>ANA SAYFA</a>
+            <a href="#about"      class="tech-font hover:text-blue-500 transition-colors text-3xl text-gray-800" data-close-menu>KURUMSAL</a>
+            <a href="#mission"    class="tech-font hover:text-blue-500 transition-colors text-3xl text-gray-800" data-close-menu>VİZYON</a>
+            <a href="#quote"      class="tech-font text-3xl font-extrabold" style="color:var(--accent-main)" data-close-menu>TEKLİF AL</a>
+            <a href="#news"       class="tech-font hover:text-blue-500 transition-colors text-3xl text-gray-800" data-close-menu>HABERLER</a>
+            <a href="#contact"    class="tech-font hover:text-blue-500 transition-colors text-3xl text-gray-800" data-close-menu>İLETİŞİM</a>
+        </div>
+    </div>
+
+    <!-- NAVİGASYON -->
+    <nav class="fixed w-full z-50 top-0 p-4 md:p-6 flex justify-between items-center transition-all duration-300 fixed-glass">
+        <a href="#hub" class="text-xl md:text-2xl font-bold tracking-widest tech-font z-20 text-gray-800">
+            TARSUS<span style="color:var(--accent-main)">88</span>
+        </a>
+        
+        <div class="hidden md:flex flex-1 justify-center">
+            <div class="space-x-8 text-xs font-bold tracking-widest text-gray-600">
+                <a href="#hub"     class="nav-link hover:text-blue-500 transition-colors">Ana Sayfa</a>
+                <a href="#about"   class="nav-link hover:text-blue-500 transition-colors">Kurumsal</a>
+                <a href="#mission" class="nav-link hover:text-blue-500 transition-colors">Vizyon</a>
+                <a href="#quote"   class="nav-link font-extrabold transition-colors" style="color:var(--accent-main)">TEKLİF AL</a>
+                <a href="#news"    class="nav-link hover:text-blue-500 transition-colors">Haberler</a>
+                <a href="#contact" class="nav-link hover:text-blue-500 transition-colors">İletişim</a>
+            </div>
+        </div>
+
+        <!-- DÜZELTME 5: Anlamsız # linkleri ilgili bölümlere yönlendirildi -->
+        <div class="hidden md:flex space-x-6 text-xs font-bold tracking-widest text-gray-600 z-20">
+            <a href="#contact" class="nav-link" style="color:var(--accent-main)">İletişim</a>
+            <a href="#about"   class="nav-link" style="color:var(--accent-light)">Hakkımızda</a>
+            <a href="#quote"   class="nav-link text-red-600">Teklif Al</a>
+        </div>
+
+        <button id="menu-toggle-btn" class="md:hidden p-2 z-10" style="color:var(--accent-main)">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+        </button>
+    </nav>
+
+    <main id="main-content">
+        <!-- HERO -->
+        <section id="hub" class="min-h-screen flex items-center justify-center relative px-4 pt-20">
+            <div class="text-center max-w-5xl z-10">
+                <p class="anim-entry-top tracking-[0.3em] text-xs font-bold mb-3 md:mb-4" style="color:var(--accent-main)">
+                    TARSUS 88 NOLU KARA YOLU YÜK TAŞIMA KOOPERATİFİ
+                </p>
+                <h1 class="anim-entry-scale text-4xl sm:text-5xl md:text-8xl font-bold text-gray-800 mb-4 md:mb-6 tech-font leading-tight">
+                    <span class="gradient-text">LOJİSTİK</span> <span class="text-gray-800 neon-glow-text">GÜÇ</span>
+                </h1>
+                <p class="anim-entry-bottom text-gray-600 text-sm md:text-xl max-w-3xl mx-auto font-light leading-relaxed">
+                    31 yılı aşkın süredir sektörde faaliyet gösteren
+                    <span class="font-bold" style="color:var(--accent-main)">518 deneyimli üye</span> ve
+                    <span class="font-bold" style="color:var(--accent-main)">600 tırlık</span> devasa filo.
+                </p>
+            </div>
+            <div class="absolute bottom-6 left-6 w-20 h-20 md:w-32 md:h-32 border-l border-b border-blue-300/30 anim-entry-left"></div>
+        </section>
+
+        <!-- KURUMSAL -->
+        <section id="about" class="py-20 lg:py-32 relative">
+            <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 items-start">
+                
+                <div class="lg:col-span-3 space-y-6 md:space-y-8 anim-scroll-3d-left text-center lg:text-left">
+                    <h2 class="text-3xl md:text-6xl font-bold tech-font border-b pb-3 md:pb-4 neon-glow-text inline-block mx-auto lg:mx-0" style="border-color:rgba(41,128,185,0.3)">
+                        KURUMSAL
+                    </h2>
+                    <h3 class="text-lg md:text-xl font-bold" style="color:var(--accent-main)">1994'ten Bugüne Güven, Deneyim ve Profesyonellik</h3>
+                    
+                    <div class="cyber-card js-tilt p-4 md:p-6 rounded-2xl">
+                        <!-- DÜZELTME 6: aspect-ratio CSS ile düzeltildi (Tailwind plugin gerektiren sınıflar kaldırıldı) -->
+                        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                            <iframe
+                                src="https://www.youtube.com/embed/NR_VNsw-bjc?si=7vSDXZgvVSEFVC8&start=1"
+                                title="YouTube video player"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allowfullscreen
+                                style="position:absolute; top:0; left:0; width:100%; height:100%; border-radius:0.5rem;">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6 md:space-y-8 anim-scroll-3d-right text-center lg:text-left">
+                    <div class="cyber-card js-tilt p-6 md:p-8 rounded-xl h-full border-l-4" style="border-color:var(--accent-main)">
+                        <p class="text-sm md:text-base text-gray-700 leading-relaxed mb-4 md:mb-6">
+                            1994 yılında kurulan Tarsus Tırcılar Kamyoncular Karayolu Yük Taşımacılığı Kooperatifi, sektördeki köklü geçmişi, kurumsal yapısı ve güçlü filosuyla Türkiye'nin en güvenilir lojistik organizasyonlarından biridir.
+                        </p>
+                        <p class="text-sm text-gray-500 leading-relaxed italic border-l pl-3 md:pl-4 mb-4 md:mb-6 text-center lg:text-left" style="border-color:rgba(93,173,226,0.5)">
+                            Bugün <strong>600 tırlık</strong> modern filomuz ve <strong>518 profesyonel üyemizle</strong>, Türkiye'nin dört bir yanına hızlı, güvenilir ve zamanında taşıma hizmeti sağlamaktayız.
+                        </p>
+                        
+                        <h4 class="text-base md:text-xl font-bold mt-6 md:mt-8 mb-3 md:mb-4" style="color:var(--accent-main)">Yasal Uygunluk ve Süreç Kalitesi Tescili</h4>
+                        <ul class="space-y-2 text-xs md:text-sm text-gray-600">
+                            <li class="flex items-center gap-2 justify-center lg:justify-start">
+                                <span class="text-lg" style="color:var(--accent-main)">›</span>
+                                T.C. Ulaştırma ve Altyapı Bakanlığı onaylı <strong>K1 Yetki Belgesi</strong> ve <strong>ISO 9001:2015</strong>.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MİSYON & VİZYON -->
+        <section id="mission" class="py-20 lg:py-32 bg-white/50 border-t border-b border-gray-200">
+            <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                
+                <div class="anim-scroll-up cyber-card js-tilt p-6 md:p-10 rounded-2xl border-l-4 text-center" style="border-color:var(--accent-main)">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4 tech-font neon-glow-text" style="color:var(--accent-main)">MİSYONUMUZ</h2>
+                    <p class="text-sm md:text-base text-gray-700 leading-relaxed mb-6">
+                        Kooperatifimizin temel misyonu, üyelerimizin rekabet gücünü artırmak üzere sürdürülebilir, etik ve teknoloji odaklı bir lojistik ekosistemi kurmak ve işletmektir.
+                    </p>
+                </div>
+
+                <div class="anim-scroll-up cyber-card js-tilt p-6 md:p-10 rounded-2xl border-l-4 text-center" style="border-color:var(--accent-light); transition-delay:0.2s;">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4 tech-font neon-glow-text" style="color:var(--accent-light)">VİZYONUMUZ (2030)</h2>
+                    <p class="text-sm md:text-base text-gray-700 leading-relaxed mb-6">
+                        2030 yılına kadar ulaşmayı hedeflediğimiz temel vizyonumuz: En geniş kapsamlı ve en modern teknolojiye sahip lojistik ağı olmak.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- YÖNETİM KURULU -->
+        <section id="management" class="py-20 lg:py-32 relative">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="anim-scroll-rotate-x text-4xl md:text-6xl font-bold tech-font text-gray-800 mb-8 md:mb-12">
+                    YÖNETİM <span class="neon-glow-text" style="color:var(--accent-main)">KURULU</span>
+                </h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12">
+                    <div class="cyber-card js-tilt p-6 md:p-8 rounded-xl anim-scroll-3d-left border-t-4" style="border-color:var(--accent-main)">
+                        <p class="text-xs font-bold mb-1 tracking-widest" style="color:var(--accent-main)">BAŞKAN</p>
+                        <h3 class="text-xl md:text-3xl font-bold text-gray-800 mb-2 tech-font neon-glow-text">Hasan Yıldırım</h3>
+                    </div>
+                    <div class="cyber-card js-tilt p-6 md:p-8 rounded-xl anim-scroll-deep-zoom border-t-4" style="border-color:var(--accent-light); transition-delay:0.1s;">
+                        <p class="text-xs font-bold mb-1 tracking-widest" style="color:var(--accent-light)">2. BAŞKAN</p>
+                        <h3 class="text-xl md:text-3xl font-bold text-gray-800 mb-2 tech-font neon-glow-text">Hidayet Şahin</h3>
+                    </div>
+                    <div class="cyber-card js-tilt p-6 md:p-8 rounded-xl anim-scroll-3d-right border-t-4 border-gray-400" style="transition-delay:0.2s;">
+                        <p class="text-xs text-gray-600 font-bold mb-1 tracking-widest">MUHASİP ÜYE</p>
+                        <h3 class="text-xl md:text-3xl font-bold text-gray-800 mb-2 tech-font neon-glow-text">Ersin Çelik</h3>
+                    </div>
+                </div>
+
+                <div class="anim-scroll-up cyber-card p-4 md:p-6 rounded-xl border-l-4" style="border-color:rgba(41,128,185,0.5)">
+                    <h4 class="text-xs md:text-sm font-bold text-gray-500 mb-4 tracking-widest">DİĞER YÖNETİM KURULU ÜYELERİ</h4>
+                    <p class="text-sm md:text-base text-gray-700 leading-loose">
+                        HAKAN ÇİFÇİ <span style="color:var(--accent-main)">◣</span>
+                        RECEP TEHNELDERE <span style="color:var(--accent-main)">◣</span>
+                        CUMALİ YILDIZ <span style="color:var(--accent-main)">◣</span>
+                        ABDULKADİR BAŞLI <span style="color:var(--accent-main)">◣</span>
+                        SERHAT ÇOPUR <span style="color:var(--accent-main)">◣</span>
+                        MUHAMMET ALİ GÜNGÖR
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- HABERLER -->
+        <section id="news" class="py-20 lg:py-32 bg-white/50 border-t border-b border-gray-200">
+            <div class="container mx-auto px-4">
+                <h2 class="anim-scroll-left text-3xl md:text-6xl mb-12 md:mb-16 tech-font border-b pb-4 text-center lg:text-left text-gray-800" style="border-color:rgba(41,128,185,0.3)">
+                    OPERASYONEL <span class="neon-glow-text" style="color:var(--accent-main)">BİLDİRİMLER</span>
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                    <div class="cyber-card js-tilt p-6 rounded-xl anim-scroll-up border-t-2 text-center" style="border-color:var(--accent-main)">
+                        <p class="text-xs font-bold mb-2" style="color:var(--accent-main)">25.01.2025</p>
+                        <h4 class="text-base md:text-lg font-bold text-gray-800 mb-3 neon-glow-text">Olağan Genel Kurul</h4>
+                        <p class="text-xs md:text-sm text-gray-600">Mevcut başkan Hasan Yıldırım, Şoförler ve Otomobilciler Odası salonunda gerçekleşen kurulda güven tazeledi.</p>
+                    </div>
+                    <div class="cyber-card js-tilt p-6 rounded-xl anim-scroll-up border-t-2 text-center" style="border-color:var(--accent-light); transition-delay:0.1s;">
+                        <p class="text-xs font-bold mb-2" style="color:var(--accent-light)">10.04.2024</p>
+                        <h4 class="text-base md:text-lg font-bold text-gray-800 mb-3 neon-glow-text">Taleplerimiz Meclis Gündeminde</h4>
+                        <p class="text-xs md:text-sm text-gray-600">Kooperatifimiz, üyelerinin sektörel sorunlarını TBMM gündemine taşıyarak ulusal düzeyde bir adım attı.</p>
+                    </div>
+                    <div class="cyber-card js-tilt p-6 rounded-xl anim-scroll-up border-t-2 text-center hidden sm:block" style="border-color:var(--accent-main); transition-delay:0.2s;">
+                        <p class="text-xs font-bold mb-2" style="color:var(--accent-main)">12.02.2025</p>
+                        <h4 class="text-base md:text-lg font-bold text-gray-800 mb-3 neon-glow-text">Kaymakam Ziyareti</h4>
+                        <p class="text-xs md:text-sm text-gray-600">Kaymakam Mehmet Ali AKYÜZ, kooperatif üyeleriyle bir araya gelerek sektörün güncel durumu üzerine sohbet etti.</p>
+                    </div>
+                    <div class="cyber-card js-tilt p-6 rounded-xl anim-scroll-up border-t-2 text-center hidden lg:block" style="border-color:var(--accent-light); transition-delay:0.3s;">
+                        <p class="text-xs font-bold mb-2" style="color:var(--accent-light)">30.07.2025</p>
+                        <h4 class="text-base md:text-lg font-bold text-gray-800 mb-3 neon-glow-text">Dijitalleşme Hamlesi</h4>
+                        <p class="text-xs md:text-sm text-gray-600">Yeni Nesil Filo Takip Sistemi (NFT) entegrasyonu tamamlandı. Operasyonlar %15 hızlandı.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TEKLİF FORMU -->
+        <section id="quote" class="py-20 lg:py-32 relative border-t border-b bg-white/70" style="border-color:rgba(41,128,185,0.1)">
+            <div class="container mx-auto px-4">
+                <h2 class="anim-scroll-rotate-x text-4xl md:text-6xl font-bold tech-font text-gray-800 mb-12 text-center">
+                    YÜK TAŞIMA <span class="neon-glow-text" style="color:var(--accent-main)">TEKLİF KONSOLU</span>
+                </h2>
+                
+                <!-- DÜZELTME 7: form submit mailto ile gerçek e-posta gönderimini destekler hale getirildi -->
+                <form id="quoteForm" class="anim-scroll-up max-w-4xl mx-auto cyber-card js-tilt p-6 md:p-10 rounded-2xl border-l-4" style="border-color:var(--accent-main)" tabindex="0">
+                    
+                    <div class="space-y-8">
+                        <div class="border-b border-gray-300 pb-6">
+                            <h3 class="text-xl md:text-2xl font-bold mb-6 tech-font" style="color:var(--accent-main)">Hizmet ve Güzergah Bilgileri</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="serviceType" class="block text-sm font-bold text-gray-700 mb-2">Hizmet Türü <span class="text-red-500">*</span></label>
+                                    <select id="serviceType" name="serviceType" required class="form-control">
+                                        <option value="" disabled selected>Hizmet türünü seçin</option>
+                                        <option value="contract">Kurumsal Sözleşme (Öncelikli)</option>
+                                        <option value="single">Tek Seferlik Yük Taşıma</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="frequency" class="block text-sm font-bold text-gray-700 mb-2">Beklenen Taşıma Sıklığı (Opsiyonel)</label>
+                                    <input type="text" id="frequency" name="frequency" placeholder="Örn: Haftalık 3 sefer, Aylık" class="form-control">
+                                </div>
+                                <div>
+                                    <label for="departureCity" class="block text-sm font-bold text-gray-700 mb-2">Çıkış Şehri</label>
+                                    <select id="departureCity" name="departureCity" class="form-control">
+                                        <option value="" selected>Çıkış ilini seçin (Opsiyonel)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="arrivalCity" class="block text-sm font-bold text-gray-700 mb-2">Varış Şehri</label>
+                                    <select id="arrivalCity" name="arrivalCity" class="form-control">
+                                        <option value="" selected>Varış ilini seçin (Opsiyonel)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-b border-gray-300 pb-6">
+                            <h3 class="text-xl md:text-2xl font-bold mb-6 tech-font" style="color:var(--accent-main)">Yük ve Teslimat Detayları</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label for="cargoType" class="block text-sm font-bold text-gray-700 mb-2">Yük Cinsi ve Özellikleri <span class="text-red-500">*</span></label>
+                                    <input type="text" id="cargoType" name="cargoType" required placeholder="Örn: Paletli yük, Dökme, Gıda, ADR" class="form-control">
+                                </div>
+                                <div>
+                                    <label for="weightVolume" class="block text-sm font-bold text-gray-700 mb-2">Tahmini Ağırlık / Hacim</label>
+                                    <input type="text" id="weightVolume" name="weightVolume" placeholder="Örn: 24 Ton / 80 m3" class="form-control">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="loadingType" class="block text-sm font-bold text-gray-700 mb-2">Yükleme Şekli / Araç Tipi</label>
+                                    <input type="text" id="loadingType" name="loadingType" placeholder="Örn: Tır / Tenteli / Vinçli Yükleme" class="form-control">
+                                </div>
+                            </div>
+                            <div class="mt-6">
+                                <label for="specialRequirements" class="block text-sm font-bold text-gray-700 mb-2">Teslimat veya Özel Taşıma Gereksinimleri (Açıklama)</label>
+                                <textarea id="specialRequirements" name="specialRequirements" rows="3" placeholder="Örn: Belirli saat aralığında teslimat, soğuk zincir..." class="form-control"></textarea>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-bold mb-6 tech-font" style="color:var(--accent-light)">İletişim Bilgileri</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="companyName" class="block text-sm font-bold text-gray-700 mb-2">Firma / Kurum Adı <span class="text-red-500">*</span></label>
+                                    <input type="text" id="companyName" name="companyName" required class="form-control">
+                                </div>
+                                <div>
+                                    <label for="contactName" class="block text-sm font-bold text-gray-700 mb-2">Yetkili Adı Soyadı</label>
+                                    <input type="text" id="contactName" name="contactName" class="form-control">
+                                </div>
+                                <div>
+                                    <label for="contactPhone" class="block text-sm font-bold text-gray-700 mb-2">Yetkili Telefon Numarası</label>
+                                    <input type="tel" id="contactPhone" name="contactPhone" class="form-control">
+                                </div>
+                                <div>
+                                    <label for="contactEmail" class="block text-sm font-bold text-gray-700 mb-2">Kurumsal E-posta Adresi <span class="text-red-500">*</span></label>
+                                    <input type="email" id="contactEmail" name="contactEmail" required class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-300">
+                        <div class="flex items-center mb-6">
+                            <input type="checkbox" id="termsAccepted" name="termsAccepted" required class="w-4 h-4 border-gray-400 rounded" style="accent-color:var(--accent-main)">
+                            <label for="termsAccepted" class="ml-3 text-sm text-gray-600">
+                                Hizmet Şartlarını ve Veri Kullanım Politikasını okudum ve kabul ediyorum. <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 text-white font-extrabold rounded-lg text-lg transition-all shadow-lg" style="background:var(--accent-main);"
+                            onmouseover="this.style.background='var(--accent-light)'"
+                            onmouseout="this.style.background='var(--accent-main)'">
+                            E-posta ile Teklif Talebi Oluştur
+                        </button>
+                        <!-- DÜZELTME 8: Form gönderim durumu mesajı için alan eklendi -->
+                        <p id="form-status" class="text-center text-sm mt-4 hidden"></p>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- İLETİŞİM -->
+        <section id="contact" class="py-20 lg:py-32 relative">
+            <div class="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+                
+                <div class="anim-scroll-rotate-x space-y-8 md:space-y-10 text-center lg:text-left">
+                    <h2 class="text-4xl md:text-6xl font-bold tech-font text-gray-800 border-b border-gray-300 pb-4 inline-block mx-auto lg:mx-0">
+                        İLETİŞİM <span class="gradient-text neon-glow-text">AĞI</span>
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div class="cyber-card js-tilt p-4 rounded-lg text-center">
+                            <p class="text-xs font-bold" style="color:var(--accent-light)">ADRES</p>
+                            <p class="text-sm md:text-base text-gray-800">NO 164/A, Yarbay Şemsettin, Ankara Bl., 33460 Tarsus/Mersin</p>
+                        </div>
+                        <!-- DÜZELTME 9: Telefon numarası tıklanabilir hale getirildi -->
+                        <div class="cyber-card js-tilt p-4 rounded-lg text-center">
+                            <p class="text-xs font-bold" style="color:var(--accent-main)">TELEFON</p>
+                            <a href="tel:+905337258329" class="text-sm md:text-base text-gray-800 hover:underline">+90 533 725 83 29</a>
+                        </div>
+                        <!-- DÜZELTME 10: E-posta tıklanabilir hale getirildi -->
+                        <div class="cyber-card js-tilt p-4 rounded-lg text-center">
+                            <p class="text-xs font-bold" style="color:var(--accent-main)">EMAİL</p>
+                            <a href="mailto:tarsuskoopmuhasebe@88tarsuskamkoop.com" class="text-sm md:text-base text-gray-800 hover:underline break-all">tarsuskoopmuhasebe@88tarsuskamkoop.com</a>
+                        </div>
+                    </div>
+
+                    <!-- DÜZELTME 11: Bülten checkbox'ı Türkçeleştirildi -->
+                    <form id="newsletterForm" class="cyber-card js-tilt p-6 rounded-xl border-l-4" style="border-color:var(--accent-light)">
+                        <h3 class="text-base md:text-xl font-bold text-gray-800 mb-4">HABER AKIŞINA ABONE OL</h3>
+                        <input type="email" id="newsletter-email" placeholder="E-posta Adresiniz" class="form-control mb-3 text-left" required>
+                        <div class="flex items-center mb-4 justify-center lg:justify-start">
+                            <input type="checkbox" id="subscribe-check" required class="w-4 h-4 border-gray-400 rounded" style="accent-color:var(--accent-main)">
+                            <label for="subscribe-check" class="ml-2 text-xs md:text-sm text-gray-600">Bültene abone olmak istiyorum.</label>
+                        </div>
+                        <button type="submit" class="w-full py-3 text-white font-bold rounded-lg transition-all" style="background:var(--accent-main)"
+                            onmouseover="this.style.background='var(--accent-light)'"
+                            onmouseout="this.style.background='var(--accent-main)'">
+                            ABONE OL
+                        </button>
+                        <p id="newsletter-status" class="text-center text-sm mt-3 hidden"></p>
+                    </form>
+                </div>
+
+                <!-- DÜZELTME 12: anim-scroll-zoom class tanımsızdı, anim-scroll-up ile değiştirildi -->
+                <div class="anim-scroll-up js-tilt relative w-full rounded-2xl overflow-hidden border shadow-lg" style="height:400px; border-color:rgba(41,128,185,0.3); box-shadow:0 0 50px var(--neon-glow);">
+                    <div class="absolute inset-0 z-20 pointer-events-none border-8 md:border-16 border-transparent mix-blend-overlay" style="border-top-color:rgba(41,128,185,0.2);border-bottom-color:rgba(41,128,185,0.2)"></div>
+                    <div class="absolute top-4 left-4 z-20 cyber-card p-2 text-xs font-mono" style="color:var(--accent-main)">LOKASYON BİLDİRİMİ</div>
+                    
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3781.9306411113816!2d34.938595400000004!3d36.9553782!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1527df1eb4cab82b%3A0x610e44f0a29f765d!2sSS.%2088%20NOLU%20TARSUS%20KAM%20KOOP.!5e1!3m2!1str!2str!4v1763642687651!5m2!1str!2str"
+                        width="100%" height="100%"
+                        style="border:0; filter:saturate(100%) brightness(1.1) contrast(1.1) grayscale(0.2) hue-rotate(200deg); transform:scale(1.1); transition:transform 0.7s;"
+                        allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Kooperatif Konumu">
+                    </iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <!-- DÜZELTME 13: Footer linkleri ilgili section'lara bağlandı -->
+        <footer class="border-t border-gray-200 bg-white/70 py-8 md:py-12 text-center relative z-10">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-8 mb-4 md:mb-6 text-xs text-gray-600">
+                    <a href="#contact" class="hover:underline transition-colors" style="color:inherit">Gizlilik Politikası</a>
+                    <a href="#contact" class="hover:underline transition-colors" style="color:inherit">Şart ve Koşullar</a>
+                </div>
+                <p class="text-gray-500 text-xs tracking-[0.3em]">
+                    © 2025 Tarsus Tırcılar Kooperatifi. Her hakkı saklıdır.
+                </p>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // ==================================================
+        // 1. DİNAMİK ŞEHİR LİSTESİ
+        // ==================================================
+        const cities = [
+            "Adana","Adıyaman","Afyonkarahisar","Ağrı","Aksaray","Amasya","Ankara","Antalya","Ardahan","Artvin","Aydın","Balıkesir","Bartın","Batman","Bayburt","Bilecik","Bingöl","Bitlis","Bolu","Burdur","Bursa","Çanakkale","Çankırı","Çorum","Denizli","Diyarbakır","Düzce","Edirne","Elazığ","Erzincan","Erzurum","Eskişehir","Gaziantep","Giresun","Gümüşhane","Hakkari","Hatay","Iğdır","Isparta","İstanbul","İzmir","Kahramanmaraş","Karabük","Karaman","Kars","Kastamonu","Kayseri","Kilis","Kırıkkale","Kırklareli","Kırşehir","Kocaeli","Konya","Kütahya","Malatya","Manisa","Mardin","Mersin","Muğla","Muş","Nevşehir","Niğde","Ordu","Osmaniye","Rize","Sakarya","Samsun","Şanlıurfa","Siirt","Sinop","Sivas","Şırnak","Tekirdağ","Tokat","Trabzon","Tunceli","Uşak","Van","Yalova","Yozgat","Zonguldak"
+        ];
+
+        function populateCities(selectId) {
+            const el = document.getElementById(selectId);
+            if (!el) return;
+            cities.forEach(city => {
+                const opt = document.createElement('option');
+                opt.value = city;
+                opt.textContent = city;
+                el.appendChild(opt);
+            });
+        }
+
+        // DÜZELTME 7 (devam): Form verilerini mailto ile e-posta olarak açar
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const f = event.target;
+            const statusEl = document.getElementById('form-status');
+
+            const serviceType    = f.serviceType?.value    || '';
+            const departureCity  = f.departureCity?.value  || '';
+            const arrivalCity    = f.arrivalCity?.value    || '';
+            const cargoType      = f.cargoType?.value      || '';
+            const weightVolume   = f.weightVolume?.value   || '';
+            const loadingType    = f.loadingType?.value    || '';
+            const specialReqs    = f.specialRequirements?.value || '';
+            const companyName    = f.companyName?.value    || '';
+            const contactName    = f.contactName?.value    || '';
+            const contactPhone   = f.contactPhone?.value   || '';
+            const contactEmail   = f.contactEmail?.value   || '';
+
+            const subject = encodeURIComponent(`Teklif Talebi - ${companyName}`);
+            const body = encodeURIComponent(
+`Hizmet Türü: ${serviceType}
+Çıkış Şehri: ${departureCity}
+Varış Şehri: ${arrivalCity}
+
+Yük Cinsi: ${cargoType}
+Ağırlık/Hacim: ${weightVolume}
+Yükleme Şekli: ${loadingType}
+Özel Gereksinimler: ${specialReqs}
+
+Firma: ${companyName}
+Yetkili: ${contactName}
+Telefon: ${contactPhone}
+E-posta: ${contactEmail}`
+            );
+
+            window.location.href = `mailto:tarsuskoopmuhasebe@88tarsuskamkoop.com?subject=${subject}&body=${body}`;
+
+            if (statusEl) {
+                statusEl.textContent = '✓ Teklif talebiniz e-posta istemcinize yüklendi.';
+                statusEl.style.color = 'green';
+                statusEl.classList.remove('hidden');
+            }
+            f.reset();
+        }
+
+        function handleNewsletterSubmit(event) {
+            event.preventDefault();
+            const statusEl = document.getElementById('newsletter-status');
+            if (statusEl) {
+                statusEl.textContent = '✓ Abone olduğunuz için teşekkürler!';
+                statusEl.style.color = 'green';
+                statusEl.classList.remove('hidden');
+            }
+            event.target.reset();
+        }
+
+        // ==================================================
+        // 2. GSAP ANIMASYONLAR
+        // ==================================================
+        gsap.registerPlugin(ScrollTrigger);
+
+        const createScrollAnim = (selector, fromVars) => {
+            gsap.utils.toArray(selector).forEach(elem => {
+                if (window.innerWidth < 768) {
+                    gsap.set(elem, { opacity: 1, visibility: 'visible' });
+                    return;
+                }
+                gsap.fromTo(elem,
+                    { ...fromVars, opacity: 0, visibility: 'hidden' },
+                    {
+                        ...fromVars,
+                        x: 0, y: 0, z: 0, scale: 1, rotation: 0, rotationX: 0, rotationY: 0,
+                        opacity: 1, visibility: 'visible',
+                        duration: 1.8, ease: "power4.out",
+                        scrollTrigger: { trigger: elem, start: "top 88%", toggleActions: "play none none reverse" }
+                    }
+                );
+            });
+        };
+
+        function initProgressBar() {
+            const pb = document.getElementById('progress-bar');
+            if (pb) {
+                gsap.to(pb, {
+                    width: '100%', ease: 'none',
+                    scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 0.5 }
+                });
+            }
+        }
+
+        function initScrollAnimations() {
+            gsap.from(".anim-entry-top",    { duration: 1.8, y: -150, opacity: 0, ease: "expo.out", delay: 0.2 });
+            gsap.from(".anim-entry-bottom", { duration: 1.8, y:  150, opacity: 0, ease: "expo.out", delay: 0.4 });
+            gsap.from(".anim-entry-left",   { duration: 1.8, x: -300, opacity: 0, ease: "expo.out", delay: 0.6 });
+            gsap.from(".anim-entry-scale",  { duration: 2.5, scale: 0.2, opacity: 0, ease: "elastic.out(1, 0.4)", delay: 0.3 });
+
+            createScrollAnim(".anim-scroll-left",     { x: -400 });
+            createScrollAnim(".anim-scroll-3d-left",  { x: -800, rotationY: -110, scale: 0.4 });
+            createScrollAnim(".anim-scroll-3d-right", { x:  800, rotationY:  110, scale: 0.4 });
+            createScrollAnim(".anim-scroll-up",       { y:  300 });
+            createScrollAnim(".anim-scroll-rotate-x", { rotationX: 90, transformOrigin: "top center" });
+
+            gsap.utils.toArray(".anim-scroll-deep-zoom").forEach(elem => {
+                if (window.innerWidth < 768) { gsap.set(elem, { opacity: 1, visibility: 'visible' }); return; }
+                gsap.fromTo(elem,
+                    { scale: 0.3, z: -800, opacity: 0, filter: "blur(20px)" },
+                    { scale: 1, z: 0, opacity: 1, filter: "blur(0px)", duration: 2.0, ease: "power4.out",
+                      scrollTrigger: { trigger: elem, start: "top 90%" } }
+                );
+            });
+        }
+
+        // ==================================================
+        // 3. MOBİL MENÜ
+        // ==================================================
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu-overlay');
+            if (menu) {
+                menu.classList.toggle('active');
+                document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : 'auto';
+            }
+        }
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobile-menu-overlay');
+            if (menu) { menu.classList.remove('active'); document.body.style.overflow = 'auto'; }
+        }
+
+        // ==================================================
+        // 4. DOM HAZIR
+        // ==================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            populateCities('departureCity');
+            populateCities('arrivalCity');
+
+            const quoteForm      = document.getElementById('quoteForm');
+            const newsletterForm = document.getElementById('newsletterForm');
+            if (quoteForm)      quoteForm.addEventListener('submit', handleFormSubmit);
+            if (newsletterForm) newsletterForm.addEventListener('submit', handleNewsletterSubmit);
+
+            const menuToggleBtn = document.getElementById('menu-toggle-btn');
+            const menuCloseBtn  = document.getElementById('menu-close-btn');
+            if (menuToggleBtn) menuToggleBtn.addEventListener('click', toggleMobileMenu);
+            if (menuCloseBtn)  menuCloseBtn.addEventListener('click',  closeMobileMenu);
+
+            document.querySelectorAll('#mobile-menu-overlay a').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
+
+            VanillaTilt.init(document.querySelectorAll(".js-tilt"), {
+                max: 8, speed: 400, glare: true, "max-glare": 0.3, gyroscope: true
+            });
+
+            initScrollAnimations();
+            initProgressBar();
+        });
+    </script>
+</body>
+</html>
